@@ -21,6 +21,11 @@ fun main(args: Array<String>) {
 
     //You can call a variable a function type as a regular function, providing all the unnecessary arguments.
 
-
+    //To call a Lambda stored in a variable might be convenient if you want to postpone calling a Lambda,
+    //store somewhere and call it on the later.
+    //When you store a Lambda and a variable, you can pass this variable whenever an expression of function type is expected.
+    val list = listOf(1, 2, 3, 4)
+    list.any(isEven)    //true
+    list.filter(isEven) //[2, 4]
 
 }
