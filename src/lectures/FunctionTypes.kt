@@ -26,4 +26,37 @@ fun main(args: Array<String>) {
     list.any(isEven)    //true
     list.filter(isEven) //[2, 4]
 
+
+
+    // () -> Int?
+    // This is lambda's return type is nullable
+
+    // (() -> Int)?
+    // variable declared lambda is nullable
+
+    //val f1: () -> Int? = null       // compile error: Can't store null in a variable of a non-nullable type.
+                                    // To store null, you need to declare a variable of a nullable type as in f3.
+    val f2: () -> Int? = { null }   // lambda without arguments that always returns null
+    val cond = true
+    val f3: (() -> Int)? = if(cond) { { 42 } } else null // either lambda returning Int or null reference
+    //val f4: (() -> Int)? = { null } // The compiler expects the Lambda that returns only integer values
+                                    // But this tried to assign there a Lambda which returns null.
+
+
+    //how you should call a variable of a nullable function type
+    //(You can't call it as a regular function because it's nullable)
+
+    //1. check the variable explicitly for being not null, then call it
+    val f: (() -> Int)? = null
+    if(f != null) {
+        f()
+    }
+
+    //2.safe access syntax
+    //you call it variable of function type by calling its invoked function.
+    //Each variable or function type can be called by invoke,
+    //but irregularly you don't need that since there is a simpler alternative, the syntax to call it directly.
+    f?.invoke()
+
+
 }
