@@ -1,10 +1,14 @@
 package lectures
 
 
-data class Person(
-    val name: String,
-    val age: Int
-)
+class Person(val name: String, val age: Int) {
+    fun isOlder(ageLimit: Int) = age > ageLimit
+
+
+    //Here, we'll return a predicate directly from the class person. This predicate is a member reference to his older function,
+    // that this is the object of which this member reference is bound to, and is usual for these we can emit it.
+    fun getAgePredicate() = this::isOlder
+}
 
 
 fun main(args: Array<String>) {
@@ -51,6 +55,40 @@ fun main(args: Array<String>) {
     val list = listOf(1, 2, 3, 4)
     list.any(::isEven2)     //true
     list.filter(::isEven2)  //[2, 4]
+    //This is not a bound reference.
+    //because here it's just a reference to a top-level function. There is no stored object in which this function is bound to
+
+
+
+
+    //Bound & Non-bound references
+
+    //regular non-bound reference which refers to a member of the person class
+    val agePredicate = Person::isOlder
+    //val agePredicate: (Person, Int) -> Boolean = Person::isOlder
+    //{ person, ageLimit -> person.isOlder(ageLimit) }
+
+    // If we check what type this member reference has, we see that the first argument of the function type is person.
+    // Whenever we want to call this variable or function tab, we need to pass the person instance explicitly.
+    val alice = Person("Alice", 29)
+    agePredicate(alice, 21)         // true
+    //it simply calls the member function is older inside on the past personnel element
+
+
+    //Save class instance(Person). And then call later class instance's member(Person::isOlder)
+    //You don't have to assign target object at setting references
+    val p = Person("Dmitry", 34)
+    val dmitryAgePredicate = p::isOlder
+    //val dmitryAgePredicate: (Int) -> Boolean = p::isOlder
+    //val dmitryAgePredicate: (Int) -> Boolean = {ageLimit -> p.isOlder(ageLimit) }
+    dmitryAgePredicate(21)
+
+
+    //a predicate directly from the class person.
+    val predicateBoundToThis = alice.getAgePredicate()
+
+
+    //Whenever you see the banks and reference without the left-hand side, it's either a reference to a top-level function or a bound reference
 
 }
 
