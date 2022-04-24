@@ -2,6 +2,8 @@ package assignments
 
 
 fun String.isNice(): Boolean {
+    //My solution
+    /*
     val fList = listOf("bu", "ba", "be")
     val sList = listOf("a", "e", "i", "o", "u")
     val tList = this.chunked(1)
@@ -15,6 +17,15 @@ fun String.isNice(): Boolean {
 
 
     return ((fResult+sResult+tResult)-1 > 0)
+     */
+
+    //lecture solution
+    val noBadSubstring = setOf("bu", "ba", "be").none { this.contains(it) }
+    val hasThreeVowels = count { it in "aeiou" } >= 3 //only 5 charactrers, make 1 string is not matter for performance
+    val hasDouble = zipWithNext().any { it.first == it.second }
+
+    return listOf(noBadSubstring, hasThreeVowels, hasDouble).count { it } >= 2
+
 }
 
 
