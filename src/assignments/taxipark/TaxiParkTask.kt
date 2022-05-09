@@ -34,7 +34,7 @@ fun TaxiPark.findSmartPassengers(): Set<Passenger> =
 fun TaxiPark.findTheMostFrequentTripDurationPeriod(): IntRange? {
     val duration = this.trips.map { it.duration }.groupingBy {
         (it / 10) * 10
-    }.eachCount().maxBy { it.value }?.key
+    }.eachCount().maxByOrNull { it.value }?.key
     return duration?.let { IntRange(it, duration + 9) }
 }
 
@@ -48,9 +48,10 @@ fun TaxiPark.checkParetoPrinciple(): Boolean {
     val totalCost = this.trips.map { it.cost }.sum()
     val driverIncome = this.allDrivers.associate { it.name to 0.0 }.toMutableMap()
     this.trips.map { trip -> driverIncome[trip.driver.name] = driverIncome[trip.driver.name]!!.plus(trip.cost) }
-    val driverIncomeList = driverIncome.filter { it.value > 0.0 }.toList().sortedBy { (_, value) -> value}.toMap().values.toList()
-    val tripIncome = 0.0
+    val driverIncomeList = driverIncome.filter { it.value > 0.0 }.toList().sortedByDescending { (_, value) -> value}.toMap().values.toList()
+    var tripIncome = 0.0
     for(i in 0 until limit.toInt()){
-        tripIncome.plus(driverIncomeList[i])
+        tripIncome += driverIncomeList[i]
     }
+    return tripIncome >= totalCost*0.8
 }
