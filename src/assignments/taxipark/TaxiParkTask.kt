@@ -6,6 +6,14 @@ package taxipark
 fun TaxiPark.findFakeDrivers(): Set<Driver> =
     allDrivers.minus(trips.map { it.driver }.toSet())
 
+fun TaxiPark.findFakeDrivers1(): Set<Driver> =
+    allDrivers.filter { d -> trips.none{ it.driver == d } }.toSet()
+
+//This is slightly better since it does only one iteration via map.
+//But the difference between these two solution isn't that noticeable for not the worst-case scenario.
+fun TaxiPark.findFakeDrivers2(): Set<Driver> =
+    allDrivers - trips.map { it.driver }.toSet()
+
 /*
  * Task #2. Find all the clients who completed at least the given number of trips.
  */
@@ -13,6 +21,24 @@ fun TaxiPark.findFaithfulPassengers(minTrips: Int): Set<Passenger> =
     if (minTrips == 0) this.allPassengers
     else trips.map { it.passengers.toList() }.flatten().groupingBy { it.name }.eachCount()
         .filter { it.value >= minTrips }.map { Passenger(it.key) }.toSet()
+
+fun TaxiPark.findFaithfulPassengers1(minTrips: Int): Set<Passenger> =
+    trips
+        .flatMap { it.passengers }
+        .groupBy { it }
+        .filter { it.value.size >= minTrips }
+        .map { it.key }
+        .toSet()
+
+fun TaxiPark.findFaithfulPassengers3(minTrips: Int): Set<Passenger> =
+    allPassengers
+        .partition { p ->
+            trips.sumBy { t ->
+                if (p in t.passengers) 1 else 0
+            } >= minTrips
+        }
+        .first
+        .toSet()
 
 /*
  * Task #3. Find all the passengers, who were taken by a given driver more than once.
