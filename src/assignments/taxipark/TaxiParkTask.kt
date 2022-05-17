@@ -14,6 +14,7 @@ fun TaxiPark.findFakeDrivers1(): Set<Driver> =
 fun TaxiPark.findFakeDrivers2(): Set<Driver> =
     allDrivers - trips.map { it.driver }.toSet()
 
+
 /*
  * Task #2. Find all the clients who completed at least the given number of trips.
  */
@@ -24,11 +25,10 @@ fun TaxiPark.findFaithfulPassengers(minTrips: Int): Set<Passenger> =
 
 fun TaxiPark.findFaithfulPassengers1(minTrips: Int): Set<Passenger> =
     trips
-        .flatMap { it.passengers }
-        .groupBy { it }
-        .filter { it.value.size >= minTrips }
-        .map { it.key }
-        .toSet()
+        .flatMap(Trip::passengers)                          //.flatMap { it.passengers } -> change to a reference for clear read
+        .groupBy { passenger -> passenger }                 //.groupBy { it -> it } -> change for clear
+        .filterValues { group -> group.size >= minTrips }   //.filter { it.value.size >= minTrips } -> .filter { (_, group) -> group.size >= minTrips }
+        .keys                                               //.map { it.key }.toSet()
 
 fun TaxiPark.findFaithfulPassengers3(minTrips: Int): Set<Passenger> =
     allPassengers
@@ -40,12 +40,36 @@ fun TaxiPark.findFaithfulPassengers3(minTrips: Int): Set<Passenger> =
         .first
         .toSet()
 
+fun TaxiPark.findFaithfulPassengers3toClear(minTrips: Int): Set<Passenger> =
+    allPassengers
+        .filter { p ->                                      // Only need values about condition true. Not need second value -> change to filter
+            trips.count { p in it.passengers } >= minTrips  // subMy -> count. check directly condition
+        }.toSet()
+
+
 /*
  * Task #3. Find all the passengers, who were taken by a given driver more than once.
  */
 fun TaxiPark.findFrequentPassengers(driver: Driver): Set<Passenger> =
     this.trips.filter { it.driver.equals(driver) }.map { it.passengers.toList() }.flatten().groupingBy { it.name }
         .eachCount().filter { it.value > 1 }.map { Passenger(it.key) }.toSet()
+
+//This solution is same logic with I made.
+//But this is more clear and not need to unnecessary step.
+fun TaxiPark.findFrequentPassengers1(driver: Driver): Set<Passenger> =
+    trips.filter { trip -> trip.driver == driver }
+        .flatMap(Trip::passengers)
+        .groupBy { passenger -> passenger }
+        .filterValues { group -> group.size > 1 }
+        .keys
+
+fun TaxiPark.findFrequentPassengers2(driver: Driver): Set<Passenger> =
+    allPassengers
+        .filter { p ->
+            trips.count { it.driver == driver && p in it.passengers } > 1
+        }
+        .toSet()
+
 
 /*
  * Task #4. Find the passengers who had a discount for majority of their trips.
