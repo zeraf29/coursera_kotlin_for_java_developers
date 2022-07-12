@@ -7,7 +7,7 @@ fun TaxiPark.findFakeDrivers(): Set<Driver> =
     allDrivers.minus(trips.map { it.driver }.toSet())
 
 fun TaxiPark.findFakeDrivers1(): Set<Driver> =
-    allDrivers.filter { d -> trips.none{ it.driver == d } }.toSet()
+    allDrivers.filter { d -> trips.none { it.driver == d } }.toSet()
 
 //This is slightly better since it does only one iteration via map.
 //But the difference between these two solution isn't that noticeable for not the worst-case scenario.
@@ -78,12 +78,53 @@ fun TaxiPark.findSmartPassengers(): Set<Passenger> {
     val pair = trips.partition { it.discount is Double }
     return allPassengers
         .filter { passenger ->
-            trips.partition { it.discount is Double }.first.count { it.passengers.contains(passenger) } >
-                    trips.partition { it.discount is Double }.second.count{ it.passengers.contains(passenger) }
+            pair.first.count { it.passengers.contains(passenger) } >
+                    pair.second.count { it.passengers.contains(passenger) }
         }
         .toSet()
 }
 
+fun TaxiPark.findSmartPassengers2(): Set<Passenger> {
+    val (tripsWithDiscount, tripsWithoutDiscount) = trips.partition { it.discount != null }
+    return allPassengers
+        .filter { passenger ->
+            tripsWithDiscount.count { passenger in it.passengers } >
+                    tripsWithoutDiscount.count { passenger in it.passengers }
+        }
+        .toSet()
+}
+
+fun TaxiPark.findSmartPassengers3(): Set<Passenger> =
+    allPassengers
+        .groupBy(
+            { it },
+            { p -> trips.filter { t -> p in t.passengers } }
+        )
+        .entries
+        .filter {
+            val group = it.value.first()
+            val (withDiscount, withoutDiscount) = group
+                .partition { it.discount != null }
+            withDiscount.size > withoutDiscount.size
+        }
+        .map { it.key }
+        .toSet()
+
+fun TaxiPark.findSmartPassengers4(): Set<Passenger> =
+    allPassengers
+        .groupBy(
+            { it },
+            { p -> trips.filter { t -> p in t.passengers } }
+        )
+        .entries
+        .filter {
+            val group = it.value.first()
+            val (withDiscount, withoutDiscount) = group
+                .partition { it.discount != null }
+            withDiscount.size > withoutDiscount.size
+        }
+        .map { it.key }
+        .toSet()
 
 /*
  * Task #5. Find the most frequent trip duration among minute periods 0..9, 10..19, 20..29, and so on.
@@ -106,10 +147,11 @@ fun TaxiPark.checkParetoPrinciple(): Boolean {
     val totalCost = this.trips.map { it.cost }.sum()
     val driverIncome = this.allDrivers.associate { it.name to 0.0 }.toMutableMap()
     this.trips.map { trip -> driverIncome[trip.driver.name] = driverIncome[trip.driver.name]!!.plus(trip.cost) }
-    val driverIncomeList = driverIncome.filter { it.value > 0.0 }.toList().sortedByDescending { (_, value) -> value}.toMap().values.toList()
+    val driverIncomeList = driverIncome.filter { it.value > 0.0 }.toList().sortedByDescending { (_, value) -> value }
+        .toMap().values.toList()
     var tripIncome = 0.0
-    for(i in 0 until limit.toInt()){
+    for (i in 0 until limit.toInt()) {
         tripIncome += driverIncomeList[i]
     }
-    return tripIncome >= totalCost*0.8
+    return tripIncome >= totalCost * 0.8
 }
