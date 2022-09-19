@@ -70,6 +70,26 @@ fun TaxiPark.findFrequentPassengers2(driver: Driver): Set<Passenger> =
         }
         .toSet()
 
+fun TaxiPark.findSmartPassengers1(): Set<Passenger> {
+    val pair = trips.partition { it.discount is Double }
+    return allPassengers
+        .filter { passenger ->
+            pair.first.count { it.passengers.contains(passenger) } >
+                    pair.second.count { it.passengers.contains(passenger) }
+        }
+        .toSet()
+}
+
+fun TaxiPark.findSmartPassengers2(): Set<Passenger> {
+    val (tripsWithDiscount, tripsWithoutDiscount) =
+        trips.partition { it.discount != null }
+    return allPassengers
+        .filter { passenger ->
+            tripsWithDiscount.count { passenger in it.passengers } >
+                    tripsWithoutDiscount.count { passenger in it.passengers }
+        }
+        .toSet()
+}
 
 /*
  * Task #4. Find the passengers who had a discount for majority of their trips.
@@ -84,7 +104,7 @@ fun TaxiPark.findSmartPassengers(): Set<Passenger> {
         .toSet()
 }
 
-fun TaxiPark.findSmartPassengers2(): Set<Passenger> {
+fun TaxiPark.findSmartPassengers4(): Set<Passenger> {
     val (tripsWithDiscount, tripsWithoutDiscount) = trips.partition { it.discount != null }
     return allPassengers
         .filter { passenger ->
@@ -110,7 +130,7 @@ fun TaxiPark.findSmartPassengers3(): Set<Passenger> =
         .map { it.key }
         .toSet()
 
-fun TaxiPark.findSmartPassengers4(): Set<Passenger> =
+fun TaxiPark.findSmartPassengers5(): Set<Passenger> =
     allPassengers
         .groupBy(
             { it },
@@ -137,6 +157,28 @@ fun TaxiPark.findTheMostFrequentTripDurationPeriod(): IntRange? {
     return duration?.let { IntRange(it, duration + 9) }
 }
 
+
+/*
+fun TaxiPark.findTheMostFrequentTripDurationPeriod1(): IntRange? {
+    return trips
+        .groupBy { it.duration / 10 * 10..it.duration / 10 * 10..it.duration / 10 * 10 + 9 }
+        .toList()
+        .sortedByDescending{ it -> it.second.size }
+        .firstOrNull()
+        ?.first
+}
+ */
+fun TaxiPark.findTheMostFrequentTripDurationPeriod1(): IntRange? =
+    trips
+        .groupBy {
+            val start = it.duration / 10 * 10
+            val end = start + 9
+            start..end //start <= it.duration <= end
+        }.toList()
+        .maxByOrNull { (_, group) -> group.size }
+        ?.first
+
+
 /*
  * Task #6.
  * Check whether 20% of the drivers contribute 80% of the income.
@@ -144,7 +186,8 @@ fun TaxiPark.findTheMostFrequentTripDurationPeriod(): IntRange? {
 fun TaxiPark.checkParetoPrinciple(): Boolean {
     if (this.trips.isEmpty()) return false
     val limit = this.allDrivers.size * 0.2
-    val totalCost = this.trips.map { it.cost }.sum()
+    // val totalCost = this.trips.map { it.cost }.sum()
+    val totalCost = this.trips.sumOf { it.cost }
     val driverIncome = this.allDrivers.associate { it.name to 0.0 }.toMutableMap()
     this.trips.map { trip -> driverIncome[trip.driver.name] = driverIncome[trip.driver.name]!!.plus(trip.cost) }
     val driverIncomeList = driverIncome.filter { it.value > 0.0 }.toList().sortedByDescending { (_, value) -> value }
@@ -155,3 +198,25 @@ fun TaxiPark.checkParetoPrinciple(): Boolean {
     }
     return tripIncome >= totalCost * 0.8
 }
+
+
+fun TaxiPark.checkParetoPrinciple2(): Boolean {
+    if (trips.isEmpty()) return false
+
+    val totalIncome = trips.sumOf(Trip::cost)
+    //you can also use like below.
+    //val totalIncome = trips.sumOf{ it.cost }
+    val sortedDriversIncome: List<Double> = trips
+        .groupBy(Trip::driver) // Map<driver, List<Trip>>
+        //.groupBy{ it.driver } //you can also use like this.
+        .map { (_, tripsByDriver) -> tripsByDriver.sumOf { it.cost } } //only get value(trips by driver), then sumOf it's cost
+        .sortedDescending() //Descending. Top driver move to start index
+
+    val numberOfTopDrivers = (0.2 * allDrivers.size).toInt()
+    val incomeByTopDrivers = sortedDriversIncome
+        .take(numberOfTopDrivers) //Only Top drivers income (0~numberOfTopDrivers, cause already sortedDescending)
+        .sum()
+
+    return incomeByTopDrivers >= 0.8 * totalIncome
+}
+
