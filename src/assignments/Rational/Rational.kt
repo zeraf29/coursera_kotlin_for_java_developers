@@ -76,8 +76,16 @@ class Rational(val numerator: BigInteger, val denominator: BigInteger) {
         }
     private val normalized: Rational
         get() {
-            val gcd = numerator.gcd(denominator)
-            return Rational(numerator / gcd, denominator / gcd)
+            var num1 = this.numerator
+            var num2 = this.denominator
+            if ( (num1 < BigInteger.ZERO && num2 < BigInteger.ZERO)
+                || (num2 < BigInteger.ZERO)
+            ){
+                num1 *= (-1).toBigInteger()
+                num2 *= (-1).toBigInteger()
+            }
+            val gcd = num1.gcd(num2)
+            return Rational(num1 / gcd, num2 / gcd)
         }
 
     private fun getLcmOfDenominators(other: Rational): BigInteger {
@@ -136,7 +144,13 @@ class Rational(val numerator: BigInteger, val denominator: BigInteger) {
     override fun toString(): String {
         return when {
             this.isNormalized && denominator.compareTo(1.toBigInteger()) == 0 -> numerator.toString()
-            this.isNormalized && denominator.compareTo(1.toBigInteger()) != 0 -> "$numerator/$denominator"
+            this.isNormalized && denominator.compareTo(1.toBigInteger()) != 0 -> {
+                if(numerator*denominator > BigInteger.ZERO){
+                    "$numerator/$denominator"
+                }else{
+                    "${numerator * (-1).toBigInteger()}/${denominator * (-1).toBigInteger()}"
+                }
+            }
             else -> this.normalized.toString()
         }
     }
@@ -156,8 +170,8 @@ class RationalRange(val start: Rational, val endInclusive: Rational) {
         val lcm1 = start.denominator.multiply(element.denominator).divide(gcd1)
         val gcd2 = endInclusive.denominator.gcd(element.denominator)
         val lcm2 = endInclusive.denominator.multiply(element.denominator).divide(gcd2)
-        return (element.numerator * (lcm1/element.denominator) >= start.numerator * (lcm1/start.denominator))
-                && (element.numerator * (lcm2/element.denominator) <= endInclusive.numerator * (lcm2/endInclusive.denominator))
+        return (element.numerator * (lcm1 / element.denominator) >= start.numerator * (lcm1 / start.denominator))
+                && (element.numerator * (lcm2 / element.denominator) <= endInclusive.numerator * (lcm2 / endInclusive.denominator))
     }
 }
 
