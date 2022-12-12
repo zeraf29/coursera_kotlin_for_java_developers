@@ -74,18 +74,16 @@ class Rational(val numerator: BigInteger, val denominator: BigInteger) {
         get() {
             return numerator.gcd(denominator).compareTo(1.toBigInteger()) == 0
         }
-    private val normalized: Rational
+    val normalized: Rational
         get() {
-            var num1 = this.numerator
-            var num2 = this.denominator
-            if ( (num1 < BigInteger.ZERO && num2 < BigInteger.ZERO)
-                || (num2 < BigInteger.ZERO)
-            ){
-                num1 *= (-1).toBigInteger()
-                num2 *= (-1).toBigInteger()
+            val gcd = numerator.gcd(denominator)
+            var newNumerator = numerator / gcd
+            var newDenominator = denominator / gcd
+            if (newDenominator < BigInteger.ZERO) {
+                newNumerator *= (-1).toBigInteger()
+                newDenominator *= (-1).toBigInteger()
             }
-            val gcd = num1.gcd(num2)
-            return Rational(num1 / gcd, num2 / gcd)
+            return Rational(newNumerator, newDenominator)
         }
 
     private fun getLcmOfDenominators(other: Rational): BigInteger {
@@ -145,11 +143,8 @@ class Rational(val numerator: BigInteger, val denominator: BigInteger) {
         return when {
             this.isNormalized && denominator.compareTo(1.toBigInteger()) == 0 -> numerator.toString()
             this.isNormalized && denominator.compareTo(1.toBigInteger()) != 0 -> {
-                if(numerator*denominator > BigInteger.ZERO){
-                    "$numerator/$denominator"
-                }else{
-                    "${numerator * (-1).toBigInteger()}/${denominator * (-1).toBigInteger()}"
-                }
+                if (denominator < BigInteger.ZERO) "${numerator * (-1).toBigInteger()}/${denominator * (-1).toBigInteger()}"
+                else "$numerator/$denominator"
             }
             else -> this.normalized.toString()
         }
