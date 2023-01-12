@@ -23,8 +23,13 @@ open class SquareBoardImpl(override val width: Int) : SquareBoard {
         TODO("Not yet implemented")
     }
 
+    /**
+     * Progression: It has start and end points. and It can set a step.
+     */
     override fun getRow(i: Int, jRange: IntProgression): List<Cell> {
-        TODO("Not yet implemented")
+        return jRange.mapNotNull { j ->
+            getCellOrNull(i, j)
+        }
     }
 
     override fun getColumn(iRange: IntProgression, j: Int): List<Cell> {
@@ -41,3 +46,4 @@ open class SquareBoardImpl(override val width: Int) : SquareBoard {
     }
 
 }
+
