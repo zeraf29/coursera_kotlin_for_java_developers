@@ -32,10 +32,11 @@ fun eval(e: Expr): Int =
         is Expr.Num -> e.value
         is Expr.Sum -> eval(e.right) + eval(e.left)
         // Kotlin Compiler force needing "else" if you use "when" for checking Expr type.
+        else -> 0
     }
 
 fun main() {
-    println(eval(Sum(Sum(Num(1), Num(2)), Num(4))))
+    //println(eval(Sum(Sum(Num(1), Num(2)), Num(4))))
 }
 
 
