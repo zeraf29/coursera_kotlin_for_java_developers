@@ -21,13 +21,16 @@ fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> {
         var buffer = ""
         val rList = mutableListOf<T>()
         this.filterNotNull().forEach {
-                if(buffer.contains(it.toString())) buffer += it.toString()
-                else{
-                        buffer = if(buffer.isBlank()){
-                                it.toString()
+                val current = it.toString()
+                buffer = if(buffer.contains(current)){
+                        rList.add((buffer+current) as T)
+                        ""
+                }else{
+                        if(buffer.isEmpty()) {
+                                current
                         }else{
                                 rList.add(buffer as T)
-                                it.toString()
+                                current
                         }
                 }
         }
@@ -35,3 +38,9 @@ fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> {
         return rList
 }
 
+//checking sequence
+//https://tak8997.github.io/2021/04/24/Kotlin-Sequence/
+
+//using fold()
+//fold(): stack and add from collection's item, then return it.
+//https://velog.io/@blucky8649/%EC%BD%94%ED%8B%80%EB%A6%B0-reduce-fold-%ED%95%A8%EC%88%98
