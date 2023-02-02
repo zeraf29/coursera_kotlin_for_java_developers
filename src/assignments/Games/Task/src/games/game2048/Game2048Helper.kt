@@ -25,13 +25,11 @@ fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> {
                 buffer = if(buffer.contains(current)){
                         rList.add((buffer+current) as T)
                         ""
+                }else if(buffer.isEmpty()) {
+                        current
                 }else{
-                        if(buffer.isEmpty()) {
-                                current
-                        }else{
-                                rList.add(buffer as T)
-                                current
-                        }
+                        rList.add(buffer as T)
+                        current
                 }
         }
         if(buffer.isNotBlank()) rList.add(buffer as T)
