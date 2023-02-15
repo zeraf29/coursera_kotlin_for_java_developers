@@ -41,7 +41,9 @@ class Game2048(private val initializer: Game2048Initializer<Int>) : Game {
  * Add a new value produced by 'initializer' to a specified cell in a board.
  */
 fun GameBoard<Int?>.addNewValue(initializer: Game2048Initializer<Int>) {
-    TODO()
+    initializer.nextValue(this)?.let { (cell, value) ->
+        this[cell] = value
+    }
 }
 
 /*
@@ -53,8 +55,29 @@ fun GameBoard<Int?>.addNewValue(initializer: Game2048Initializer<Int>) {
  * Return 'true' if the values were moved and 'false' otherwise.
  */
 fun GameBoard<Int?>.moveValuesInRowOrColumn(rowOrColumn: List<Cell>): Boolean {
-    TODO()
+    val valuesRowOrColumn = rowOrColumn.map {
+        this[it]
+    }
+    valuesRowOrColumn.moveAndMergeEqual {
+        //this will be passed to moveAndMergeEqual() by merge logic
+        it * 2 //combine two values(two values are same value)
+    }.takeIf {
+        // != -> changed (moved) value from original
+        it != valuesRowOrColumn
+    }?.let {
+        rowOrColumn.forEachIndexed { index, cell ->
+            //Set moved values to original target
+            this[cell] = try {
+                it[index]
+            } catch (e: IndexOutOfBoundsException) {
+                null
+            }
+        }
+        return true
+    }
+    return false
 }
+
 
 /*
  * Update the values stored in a board,

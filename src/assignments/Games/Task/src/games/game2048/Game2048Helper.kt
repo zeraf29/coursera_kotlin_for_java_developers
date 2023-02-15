@@ -17,6 +17,24 @@ package games.game2048
  *
  * You can find more examples in 'TestGame2048Helper'.
 */
+
+fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> =
+        this.asSequence()
+                .filterNotNull()
+                .fold(mutableListOf()){ result, curr ->
+                        //put values in empty List, then compare near values
+                        when(curr){
+                                result.lastOrNull() -> {
+                                        result[result.lastIndex] = merge(curr)
+                                }
+                                else -> {
+                                        result.add(curr)
+                                }
+                        }
+                        result
+                }
+
+/*
 fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> {
         var buffer = ""
         val rList = mutableListOf<T>()
@@ -35,6 +53,7 @@ fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> {
         if(buffer.isNotBlank()) rList.add(buffer as T)
         return rList
 }
+*/
 
 //checking sequence
 //https://tak8997.github.io/2021/04/24/Kotlin-Sequence/
@@ -42,3 +61,8 @@ fun <T : Any> List<T?>.moveAndMergeEqual(merge: (T) -> T): List<T> {
 //using fold()
 //fold(): stack and add from collection's item, then return it.
 //https://velog.io/@blucky8649/%EC%BD%94%ED%8B%80%EB%A6%B0-reduce-fold-%ED%95%A8%EC%88%98
+
+
+//Lamda
+//https://ddolcat.tistory.com/557
+//https://ddolcat.tistory.com/557
