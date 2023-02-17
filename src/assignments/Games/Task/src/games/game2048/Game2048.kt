@@ -63,7 +63,7 @@ fun GameBoard<Int?>.moveValuesInRowOrColumn(rowOrColumn: List<Cell>): Boolean {
         it * 2 //combine two values(two values are same value)
     }.takeIf {
         // != -> changed (moved) value from original
-        it != valuesRowOrColumn
+        it.isNotEmpty() && (it != valuesRowOrColumn)
     }?.let {
         rowOrColumn.forEachIndexed { index, cell ->
             //Set moved values to original target
@@ -87,5 +87,14 @@ fun GameBoard<Int?>.moveValuesInRowOrColumn(rowOrColumn: List<Cell>): Boolean {
  * Return 'true' if the values were moved and 'false' otherwise.
  */
 fun GameBoard<Int?>.moveValues(direction: Direction): Boolean {
-    TODO()
+    fun getRowOrColumn(direction: Direction, index: Int): List<Cell> = when (direction) {
+        Direction.UP -> getColumn(1..this.width, index)
+        Direction.DOWN -> getColumn(this.width downTo 1, index)
+        Direction.RIGHT -> getRow(index, this.width downTo 1)
+        Direction.LEFT -> getRow(index, 1..this.width)
+    }
+    return (1..this.width).fold(false) { isMoved, idx ->
+        val temp = this
+        this.moveValuesInRowOrColumn(getRowOrColumn(direction, idx)) || isMoved
+    }
 }
