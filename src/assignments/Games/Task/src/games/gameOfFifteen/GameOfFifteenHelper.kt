@@ -11,5 +11,19 @@ package games.gameOfFifteen
  * Thus the initial permutation should be correct.
  */
 fun isEven(permutation: List<Int>): Boolean {
-    TODO()
+    val listOfOriginToPermutation = permutation.map { p ->
+        permutation.indexOf(p) + 1 to p
+    }
+    return with(listOfOriginToPermutation) {
+        val cnt = flatMap { (i, p1) ->
+            filter { (j, _) ->
+                i < j
+            }.map { (_, p2) ->
+                p1 to p2
+            }
+        }.count { (p1, p2) ->
+            p1 > p2
+        }
+        (cnt % 2 == 0)
+    }
 }
